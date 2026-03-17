@@ -2,13 +2,339 @@
 <html lang="zh-CN">
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>博客后台 - Decap CMS</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg0: #060913;
+        --bg1: #040614;
+        --fg0: rgba(255, 255, 255, 0.92);
+        --fg1: rgba(255, 255, 255, 0.72);
+        --line: rgba(255, 255, 255, 0.08);
+        --glass: rgba(10, 14, 28, 0.55);
+        --glass2: rgba(8, 10, 18, 0.25);
+        --brandA: #2563eb; /* blue */
+        --brandB: #38bdf8; /* sky */
+        --brandC: #22d3ee; /* cyan (accent) */
+        --shadow: 0 24px 80px rgba(0, 0, 0, 0.55);
+        --ring: 0 0 0 1px rgba(255, 255, 255, 0.10),
+          0 0 0 2px rgba(56, 189, 248, 0.10),
+          0 0 40px rgba(37, 99, 235, 0.18);
+      }
+
+      html,
+      body {
+        height: 100%;
+        background: radial-gradient(1100px 800px at 18% 10%, rgba(37, 99, 235, 0.16), transparent 60%),
+          radial-gradient(900px 700px at 82% 18%, rgba(56, 189, 248, 0.14), transparent 58%),
+          radial-gradient(1000px 800px at 55% 92%, rgba(34, 211, 238, 0.08), transparent 60%),
+          linear-gradient(180deg, var(--bg0), var(--bg1));
+        color: var(--fg0);
+        margin: 0;
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
+          Arial, "Noto Sans", "Liberation Sans", sans-serif;
+        overflow-x: hidden;
+      }
+
+      /* 背景层：网格 + 扫描光 */
+      .tech-bg {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+      }
+
+      .tech-grid {
+        position: absolute;
+        inset: -20%;
+        background-image:
+          linear-gradient(to right, var(--line) 1px, transparent 1px),
+          linear-gradient(to bottom, var(--line) 1px, transparent 1px);
+        background-size: 48px 48px;
+        transform: perspective(900px) rotateX(58deg) translateY(-10%);
+        transform-origin: top;
+        opacity: 0.20;
+        filter: drop-shadow(0 0 22px rgba(56, 189, 248, 0.10));
+        mask-image: radial-gradient(closest-side at 50% 18%, black 30%, transparent 78%);
+      }
+
+      .tech-scan {
+        position: absolute;
+        inset: 0;
+        background:
+          linear-gradient(
+            90deg,
+            transparent,
+            rgba(56, 189, 248, 0.06),
+            rgba(37, 99, 235, 0.05),
+            transparent
+          );
+        opacity: 0.20;
+        transform: translateX(-35%);
+        animation: scan 8s linear infinite;
+        mix-blend-mode: screen;
+      }
+
+      @keyframes scan {
+        0% {
+          transform: translateX(-35%);
+        }
+        100% {
+          transform: translateX(35%);
+        }
+      }
+
+      .tech-particles {
+        width: 100%;
+        height: 100%;
+        display: block;
+        opacity: 0.85;
+      }
+
+      /* 顶部轻量“HUD”栏（不遮挡内容） */
+      .tech-hud {
+        position: fixed;
+        top: 14px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 14px;
+        border-radius: 999px;
+        background: linear-gradient(180deg, rgba(10, 14, 28, 0.55), rgba(10, 14, 28, 0.30));
+        border: 1px solid rgba(255, 255, 255, 0.10);
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        pointer-events: none;
+      }
+
+      .tech-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 999px;
+        background: radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.08) 55%),
+          linear-gradient(135deg, var(--brandB), var(--brandA));
+        box-shadow: 0 0 18px rgba(56, 189, 248, 0.32), 0 0 28px rgba(37, 99, 235, 0.20);
+        opacity: 0.9;
+      }
+
+      .tech-title {
+        font-size: 12px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.85);
+        white-space: nowrap;
+      }
+
+      .tech-sub {
+        font-size: 12px;
+        letter-spacing: 0.04em;
+        color: var(--fg1);
+        white-space: nowrap;
+      }
+
+      /* CMS 容器玻璃化：尽量不依赖 Decap 内部 class */
+      #nc-root {
+        position: relative;
+        z-index: 1;
+        min-height: 100%;
+      }
+
+      /* Decap 会渲染一个全屏 app 容器，给它一点“玻璃”质感 */
+      #nc-root > * {
+        min-height: 100%;
+        background: linear-gradient(180deg, rgba(10, 14, 28, 0.30), rgba(10, 14, 28, 0.10));
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+      }
+
+      /* 统一细节 */
+      ::selection {
+        background: rgba(34, 211, 238, 0.25);
+      }
+
+      * {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(34, 211, 238, 0.35) rgba(255, 255, 255, 0.06);
+      }
+
+      *::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+      }
+
+      *::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.06);
+        border-radius: 999px;
+      }
+
+      *::-webkit-scrollbar-thumb {
+        background: linear-gradient(180deg, rgba(56, 189, 248, 0.40), rgba(37, 99, 235, 0.34));
+        border-radius: 999px;
+        border: 2px solid rgba(8, 10, 18, 0.55);
+      }
+
+      /* 降低动态偏好：停掉动画与粒子 */
+      @media (prefers-reduced-motion: reduce) {
+        .tech-scan {
+          animation: none;
+          opacity: 0.14;
+        }
+        .tech-grid {
+          transform: none;
+          opacity: 0.12;
+        }
+        .tech-particles {
+          opacity: 0.0;
+        }
+      }
+    </style>
   </head>
   <body>
+    <div class="tech-bg" aria-hidden="true">
+      <canvas id="techParticles" class="tech-particles"></canvas>
+      <div class="tech-grid"></div>
+      <div class="tech-scan"></div>
+    </div>
+    <div class="tech-hud" aria-hidden="true">
+      <span class="tech-dot"></span>
+      <span class="tech-title">Admin Console</span>
+      <span class="tech-sub">Decap CMS</span>
+    </div>
     <div id="nc-root"></div>
     <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
     <script src="https://unpkg.com/decap-cms@3.0.12/dist/decap-cms.js"></script>
     <script>
+      (function () {
+        const canvas = document.getElementById("techParticles");
+        if (!canvas) return;
+        const ctx = canvas.getContext("2d", { alpha: true });
+        if (!ctx) return;
+
+        const reducedMotion =
+          window.matchMedia &&
+          window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        if (reducedMotion) return;
+
+        let w = 0;
+        let h = 0;
+        let dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+        const rand = (min, max) => min + Math.random() * (max - min);
+
+        const palette = [
+          { r: 56, g: 189, b: 248 }, // sky
+          { r: 37, g: 99, b: 235 }, // blue
+          { r: 34, g: 211, b: 238 }, // cyan (accent)
+        ];
+
+        const particles = [];
+        const targetCount = () => {
+          const area = w * h;
+          return Math.max(48, Math.min(120, Math.round(area / 22000)));
+        };
+
+        function resize() {
+          w = Math.max(1, window.innerWidth);
+          h = Math.max(1, window.innerHeight);
+          dpr = Math.min(window.devicePixelRatio || 1, 2);
+          canvas.width = Math.floor(w * dpr);
+          canvas.height = Math.floor(h * dpr);
+          canvas.style.width = w + "px";
+          canvas.style.height = h + "px";
+          ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+          const n = targetCount();
+          while (particles.length < n) particles.push(makeParticle(true));
+          while (particles.length > n) particles.pop();
+        }
+
+        function makeParticle(initial = false) {
+          const p = palette[(Math.random() * palette.length) | 0];
+          return {
+            x: initial ? rand(0, w) : rand(-20, w + 20),
+            y: initial ? rand(0, h) : rand(-20, h + 20),
+            vx: rand(-0.25, 0.25),
+            vy: rand(-0.25, 0.25),
+            r: rand(1.2, 2.4),
+            c: p,
+          };
+        }
+
+        function step() {
+          ctx.clearRect(0, 0, w, h);
+
+          // 轻微暗角
+          const vignette = ctx.createRadialGradient(w * 0.5, h * 0.45, 0, w * 0.5, h * 0.45, Math.max(w, h) * 0.75);
+          vignette.addColorStop(0, "rgba(0,0,0,0)");
+          vignette.addColorStop(1, "rgba(0,0,0,0.35)");
+          ctx.fillStyle = vignette;
+          ctx.fillRect(0, 0, w, h);
+
+          // 更新粒子
+          for (const pt of particles) {
+            pt.x += pt.vx;
+            pt.y += pt.vy;
+
+            // 边界反弹（带一点随机扰动，避免死板）
+            if (pt.x < 0 || pt.x > w) pt.vx *= -1;
+            if (pt.y < 0 || pt.y > h) pt.vy *= -1;
+            pt.vx += rand(-0.01, 0.01);
+            pt.vy += rand(-0.01, 0.01);
+            pt.vx = Math.max(-0.35, Math.min(0.35, pt.vx));
+            pt.vy = Math.max(-0.35, Math.min(0.35, pt.vy));
+          }
+
+          // 连线
+          const maxDist = Math.min(180, Math.max(120, Math.round(Math.min(w, h) / 5)));
+          for (let i = 0; i < particles.length; i++) {
+            const a = particles[i];
+            for (let j = i + 1; j < particles.length; j++) {
+              const b = particles[j];
+              const dx = a.x - b.x;
+              const dy = a.y - b.y;
+              const d = Math.hypot(dx, dy);
+              if (d > maxDist) continue;
+
+              const t = 1 - d / maxDist;
+              const alpha = 0.10 * t;
+              ctx.strokeStyle = `rgba(${a.c.r}, ${a.c.g}, ${a.c.b}, ${alpha})`;
+              ctx.lineWidth = 1;
+              ctx.beginPath();
+              ctx.moveTo(a.x, a.y);
+              ctx.lineTo(b.x, b.y);
+              ctx.stroke();
+            }
+          }
+
+          // 粒子点
+          for (const pt of particles) {
+            const glow = ctx.createRadialGradient(pt.x, pt.y, 0, pt.x, pt.y, pt.r * 6);
+            glow.addColorStop(0, `rgba(${pt.c.r}, ${pt.c.g}, ${pt.c.b}, 0.22)`);
+            glow.addColorStop(1, "rgba(0,0,0,0)");
+            ctx.fillStyle = glow;
+            ctx.beginPath();
+            ctx.arc(pt.x, pt.y, pt.r * 6, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = `rgba(255,255,255,0.55)`;
+            ctx.beginPath();
+            ctx.arc(pt.x, pt.y, pt.r, 0, Math.PI * 2);
+            ctx.fill();
+          }
+
+          requestAnimationFrame(step);
+        }
+
+        window.addEventListener("resize", resize, { passive: true });
+        resize();
+        requestAnimationFrame(step);
+      })();
+
       (function () {
         if (!window.netlifyIdentity) return;
 

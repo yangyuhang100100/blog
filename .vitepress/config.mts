@@ -40,6 +40,47 @@ export default defineConfig({
   cleanUrls: true,
   lastUpdated: true,
 
+  head: [
+    [
+      'script',
+      { src: 'https://identity.netlify.com/v1/netlify-identity-widget.js' }
+    ],
+    [
+      'script',
+      {},
+      `
+;(function () {
+  var pathname = window.location.pathname || '/';
+  var hash = window.location.hash || '';
+  var search = window.location.search || '';
+
+  var params = new URLSearchParams(search);
+  var invite = params.get('invite_token');
+  var recovery = params.get('recovery_token');
+
+  var tokenHash = hash;
+  if (!tokenHash) {
+    if (invite) tokenHash = '#invite_token=' + encodeURIComponent(invite);
+    else if (recovery) tokenHash = '#recovery_token=' + encodeURIComponent(recovery);
+  }
+
+  if (!tokenHash) return;
+  if (tokenHash.indexOf('invite_token=') === -1 && tokenHash.indexOf('recovery_token=') === -1) return;
+
+  // 若已经在 /admin/，只做 hash 规范化（把 ?token 转成 #token），避免死循环
+  if (pathname.indexOf('/admin') === 0) {
+    if (!hash && tokenHash) {
+      window.history.replaceState(null, '', pathname + tokenHash);
+    }
+    return;
+  }
+
+  window.location.replace('/admin/' + tokenHash);
+})();
+      `
+    ]
+  ],
+
   themeConfig: {
     siteTitle: '小白的知识空间',
 

@@ -6,8 +6,37 @@
   </head>
   <body>
     <div id="nc-root"></div>
+    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
     <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
     <script>
+      (function () {
+        const hash = window.location.hash || "";
+        const params = new URLSearchParams(window.location.search || "");
+        const invite = params.get("invite_token");
+        const recovery = params.get("recovery_token");
+
+        // 兼容邀请链接是 ?invite_token=... 的情况：规范化为 #invite_token=...
+        if (!hash && (invite || recovery)) {
+          const tokenHash = invite
+            ? `#invite_token=${encodeURIComponent(invite)}`
+            : `#recovery_token=${encodeURIComponent(recovery)}`;
+          window.history.replaceState(null, "", window.location.pathname + tokenHash);
+        }
+
+        const effectiveHash = window.location.hash || "";
+        if (!window.netlifyIdentity) return;
+
+        window.netlifyIdentity.init();
+
+        // 处理 Netlify Identity 的邀请/找回密码 token
+        if (
+          effectiveHash.includes("invite_token=") ||
+          effectiveHash.includes("recovery_token=")
+        ) {
+          window.netlifyIdentity.open();
+        }
+      })();
+
       window.CMS_MANUAL_INIT = true;
       window.CMS_CONFIG = {
         backend: {

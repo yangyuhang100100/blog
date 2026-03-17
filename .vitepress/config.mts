@@ -20,7 +20,10 @@ export default defineConfig({
       '/posts/': [
         {
           text: '学习笔记',
-          items: [{ text: '开始', link: '/posts/' }]
+          items: [
+            { text: '目录', link: '/posts/' },
+            { text: '今天学了什么', link: '/posts/01-今天学了什么' }
+          ]
         }
       ],
       '/projects/': [

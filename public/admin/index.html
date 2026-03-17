@@ -10,31 +10,39 @@
     <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
     <script>
       (function () {
-        const hash = window.location.hash || "";
+        if (!window.netlifyIdentity) return;
+
         const params = new URLSearchParams(window.location.search || "");
         const invite = params.get("invite_token");
         const recovery = params.get("recovery_token");
 
         // 兼容邀请链接是 ?invite_token=... 的情况：规范化为 #invite_token=...
-        if (!hash && (invite || recovery)) {
+        if (!window.location.hash && (invite || recovery)) {
           const tokenHash = invite
             ? `#invite_token=${encodeURIComponent(invite)}`
             : `#recovery_token=${encodeURIComponent(recovery)}`;
           window.history.replaceState(null, "", window.location.pathname + tokenHash);
         }
 
-        const effectiveHash = window.location.hash || "";
-        if (!window.netlifyIdentity) return;
+        const needsInviteFlow = () => {
+          const effectiveHash = window.location.hash || "";
+          return (
+            effectiveHash.includes("invite_token=") ||
+            effectiveHash.includes("recovery_token=")
+          );
+        };
+
+        // 等 Identity 完成 init 后再 open，避免 open 过早导致不弹窗
+        window.netlifyIdentity.on("init", function () {
+          if (needsInviteFlow()) {
+            window.netlifyIdentity.open();
+          }
+        });
 
         window.netlifyIdentity.init();
 
-        // 处理 Netlify Identity 的邀请/找回密码 token
-        if (
-          effectiveHash.includes("invite_token=") ||
-          effectiveHash.includes("recovery_token=")
-        ) {
-          window.netlifyIdentity.open();
-        }
+        // 有些情况下 init 已经同步完成，这里再兜底一次
+        if (needsInviteFlow()) window.netlifyIdentity.open();
       })();
 
       window.CMS_MANUAL_INIT = true;

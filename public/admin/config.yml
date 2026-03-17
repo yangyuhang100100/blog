@@ -15,5 +15,11 @@ collections:
     format: "frontmatter"
     fields:
       - { label: "标题", name: "title", widget: "string" }
-      - { label: "发布时间", name: "date", widget: "datetime" }
+      - label: "发布时间"
+        name: "date"
+        widget: "datetime"
+        format: "YYYY-MM-DD HH:mm"
+        date_format: "YYYY-MM-DD"
+        time_format: "HH:mm"
+        picker_utc: false
       - { label: "正文", name: "body", widget: "markdown" }

@@ -41,7 +41,7 @@
       .tech-bg {
         position: fixed;
         inset: 0;
-        z-index: 0;
+        z-index: -1;
         pointer-events: none;
       }
 
@@ -140,16 +140,41 @@
       /* CMS 容器玻璃化：尽量不依赖 Decap 内部 class */
       #nc-root {
         position: relative;
-        z-index: 1;
+        z-index: 10;
         min-height: 100%;
       }
 
       /* Decap 会渲染一个全屏 app 容器，给它一点“玻璃”质感 */
       #nc-root > * {
         min-height: 100%;
-        background: linear-gradient(180deg, rgba(10, 14, 28, 0.30), rgba(10, 14, 28, 0.10));
+        background: linear-gradient(
+          180deg,
+          rgba(10, 14, 28, 0.62),
+          rgba(10, 14, 28, 0.40)
+        );
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
+      }
+
+      /* 让表单控件在深色背景下清晰可见（Decap 内部多为原生 input/textarea/select） */
+      #nc-root input,
+      #nc-root textarea,
+      #nc-root select {
+        background: rgba(255, 255, 255, 0.08) !important;
+        color: rgba(255, 255, 255, 0.92) !important;
+        border-color: rgba(255, 255, 255, 0.16) !important;
+      }
+
+      #nc-root input::placeholder,
+      #nc-root textarea::placeholder {
+        color: rgba(255, 255, 255, 0.55) !important;
+      }
+
+      #nc-root input:focus,
+      #nc-root textarea:focus,
+      #nc-root select:focus {
+        outline: none !important;
+        box-shadow: var(--ring) !important;
       }
 
       /* 统一细节 */

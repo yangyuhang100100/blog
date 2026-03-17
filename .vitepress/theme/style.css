@@ -2,6 +2,239 @@
   --vp-c-brand-1: #2563eb;
   --vp-c-brand-2: #1d4ed8;
   --vp-c-brand-3: #1e40af;
+
+  /* 冷静科技蓝（全局外观） */
+  color-scheme: dark;
+  --tech-bg0: #060913;
+  --tech-bg1: #040614;
+  --tech-fg0: rgba(255, 255, 255, 0.92);
+  --tech-fg1: rgba(255, 255, 255, 0.72);
+  --tech-line: rgba(255, 255, 255, 0.08);
+  --tech-glass: rgba(10, 14, 28, 0.55);
+  --tech-glass2: rgba(8, 10, 18, 0.28);
+  --tech-shadow: 0 20px 70px rgba(0, 0, 0, 0.55);
+  --tech-ring: 0 0 0 1px rgba(255, 255, 255, 0.10),
+    0 0 0 2px rgba(56, 189, 248, 0.10),
+    0 0 42px rgba(37, 99, 235, 0.16);
+
+  /* VitePress 语义色覆盖（更“冷”） */
+  --vp-c-bg: var(--tech-bg0);
+  --vp-c-bg-alt: rgba(255, 255, 255, 0.02);
+  --vp-c-bg-soft: rgba(255, 255, 255, 0.03);
+  --vp-c-bg-elv: rgba(8, 10, 18, 0.72);
+  --vp-c-text-1: var(--tech-fg0);
+  --vp-c-text-2: var(--tech-fg1);
+  --vp-c-text-3: rgba(255, 255, 255, 0.56);
+  --vp-c-divider: rgba(255, 255, 255, 0.08);
+  --vp-c-gutter: rgba(255, 255, 255, 0.06);
+}
+
+.dark {
+  --vp-c-bg: var(--tech-bg0);
+}
+
+html,
+body {
+  height: 100%;
+  background: radial-gradient(1100px 800px at 18% 10%, rgba(37, 99, 235, 0.16), transparent 60%),
+    radial-gradient(900px 700px at 82% 18%, rgba(56, 189, 248, 0.14), transparent 58%),
+    radial-gradient(1000px 800px at 55% 92%, rgba(34, 211, 238, 0.07), transparent 60%),
+    linear-gradient(180deg, var(--tech-bg0), var(--tech-bg1));
+  color: var(--tech-fg0);
+}
+
+/* 科技背景层（纯 CSS，不依赖 JS） */
+.Layout {
+  position: relative;
+  isolation: isolate;
+}
+
+.Layout::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.85;
+  background:
+    radial-gradient(1200px 900px at 50% 0%, rgba(56, 189, 248, 0.10), transparent 60%),
+    radial-gradient(900px 700px at 20% 15%, rgba(37, 99, 235, 0.10), transparent 60%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.30));
+}
+
+.Layout::after {
+  content: "";
+  position: fixed;
+  inset: -30%;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.22;
+  background-image:
+    linear-gradient(to right, var(--tech-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--tech-line) 1px, transparent 1px);
+  background-size: 48px 48px;
+  transform: perspective(900px) rotateX(58deg) translateY(-8%);
+  transform-origin: top;
+  filter: drop-shadow(0 0 20px rgba(56, 189, 248, 0.10));
+  mask-image: radial-gradient(closest-side at 50% 18%, black 30%, transparent 78%);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .Layout::before {
+    background:
+      radial-gradient(1200px 900px at 50% 0%, rgba(56, 189, 248, 0.10), transparent 60%),
+      radial-gradient(900px 700px at 20% 15%, rgba(37, 99, 235, 0.10), transparent 60%),
+      linear-gradient(
+        90deg,
+        transparent,
+        rgba(56, 189, 248, 0.05),
+        rgba(37, 99, 235, 0.04),
+        transparent
+      );
+    background-size: auto, auto, 220% 100%;
+    animation: tech-scan 10s linear infinite;
+    mix-blend-mode: screen;
+  }
+}
+
+@keyframes tech-scan {
+  0% {
+    background-position: 0 0, 0 0, -60% 0;
+  }
+  100% {
+    background-position: 0 0, 0 0, 60% 0;
+  }
+}
+
+/* 让主体内容浮在背景之上 */
+.Layout > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* 顶部导航玻璃化 */
+.VPNav {
+  background: linear-gradient(180deg, rgba(10, 14, 28, 0.70), rgba(10, 14, 28, 0.35)) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.10) !important;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.VPNavBar {
+  background: transparent !important;
+}
+
+.VPNavBarTitle .title {
+  letter-spacing: 0.06em;
+}
+
+/* 首页 Hero：更“未来感”的高光与玻璃容器 */
+.VPHomeHero {
+  position: relative;
+}
+
+.VPHomeHero::before {
+  content: "";
+  position: absolute;
+  inset: -40px -12px auto -12px;
+  height: 240px;
+  z-index: -1;
+  background: radial-gradient(closest-side at 20% 40%, rgba(56, 189, 248, 0.22), transparent 70%),
+    radial-gradient(closest-side at 80% 20%, rgba(37, 99, 235, 0.20), transparent 68%);
+  filter: blur(8px);
+  opacity: 0.85;
+}
+
+.VPHomeHero .container {
+  border-radius: 20px;
+  background: linear-gradient(180deg, var(--tech-glass), rgba(10, 14, 28, 0.25));
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  box-shadow: var(--tech-shadow);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 28px 26px;
+}
+
+.VPHomeHero .name .text {
+  letter-spacing: -0.02em;
+  text-shadow: 0 0 24px rgba(56, 189, 248, 0.14);
+}
+
+.VPHomeHero .tagline {
+  max-width: 48rem;
+}
+
+.VPHomeHero .text {
+  color: rgba(255, 255, 255, 0.88);
+}
+
+/* 首页按钮：更科技的描边与光晕 */
+.VPButton.brand {
+  box-shadow: var(--tech-ring);
+}
+
+.VPButton.alt {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+/* Feature 卡片：玻璃拟态 + 细描边 */
+.VPFeature {
+  background: linear-gradient(180deg, rgba(10, 14, 28, 0.52), rgba(10, 14, 28, 0.26)) !important;
+  border: 1px solid rgba(255, 255, 255, 0.10) !important;
+  box-shadow: 0 18px 55px rgba(0, 0, 0, 0.42);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.VPFeature:hover {
+  border-color: rgba(56, 189, 248, 0.22) !important;
+  box-shadow: 0 22px 70px rgba(0, 0, 0, 0.52), 0 0 0 2px rgba(56, 189, 248, 0.08);
+  transform: translateY(-1px);
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+
+/* 搜索框/输入更“冷” */
+.VPNavBarSearch .DocSearch-Button,
+.VPNavBarSearch .VPLocalSearchBox {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.10) !important;
+  box-shadow: none !important;
+}
+
+/* 滚动条统一 */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(56, 189, 248, 0.35) rgba(255, 255, 255, 0.06);
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 999px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(56, 189, 248, 0.40), rgba(37, 99, 235, 0.34));
+  border-radius: 999px;
+  border: 2px solid rgba(8, 10, 18, 0.55);
+}
+
+/* 降低动态：禁用扫描动画与透视网格 */
+@media (prefers-reduced-motion: reduce) {
+  .Layout::before {
+    animation: none;
+    background-size: auto;
+    mix-blend-mode: normal;
+  }
+  .Layout::after {
+    transform: none;
+    opacity: 0.12;
+  }
 }
 
 .VPHomeHero .name .text {
